@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<plist version="1.0">
+	<dict>
+		<key>1000</key>
+		<string>player01</string>
+		
+		<key>2000</key>
+		<string>long01</string>
+		
+		<key>2001</key>
+		<string>tauren</string>
+		
+		<key>10011</key>
+		<string>long01</string>
+	</dict>
+</plist>

@@ -28,6 +28,8 @@ THE SOFTWARE.
 #include <string>
 
 #include "HelloWorldScene.h"
+#include "LoadingStage.h"
+#include "GameStage.h"
 #include "AppMacros.h"
 
 USING_NS_CC;
@@ -65,29 +67,31 @@ bool AppDelegate::applicationDidFinishLaunching() {
     // this can make sure that the resource's height could fit for the height of design resolution.
 
     // if the frame's height is larger than the height of medium resource size, select large resource.
-	if (frameSize.height > mediumResource.size.height)
-	{
-        searchPath.push_back(largeResource.directory);
-
-        pDirector->setContentScaleFactor(MIN(largeResource.size.height/designResolutionSize.height, largeResource.size.width/designResolutionSize.width));
-	}
-    // if the frame's height is larger than the height of small resource size, select medium resource.
-    else if (frameSize.height > smallResource.size.height)
-    {
-        searchPath.push_back(mediumResource.directory);
-        
-        pDirector->setContentScaleFactor(MIN(mediumResource.size.height/designResolutionSize.height, mediumResource.size.width/designResolutionSize.width));
-    }
-    // if the frame's height is smaller than the height of medium resource size, select small resource.
-	else
-    {
-        searchPath.push_back(smallResource.directory);
-
-        pDirector->setContentScaleFactor(MIN(smallResource.size.height/designResolutionSize.height, smallResource.size.width/designResolutionSize.width));
-    }
-
+// 	if (frameSize.height > mediumResource.size.height)
+// 	{
+//         searchPath.push_back(largeResource.directory);
+// 
+//         pDirector->setContentScaleFactor(MIN(largeResource.size.height/designResolutionSize.height, largeResource.size.width/designResolutionSize.width));
+// 	}
+//     // if the frame's height is larger than the height of small resource size, select medium resource.
+//     else if (frameSize.height > smallResource.size.height)
+//     {
+//         searchPath.push_back(mediumResource.directory);
+//         
+//         pDirector->setContentScaleFactor(MIN(mediumResource.size.height/designResolutionSize.height, mediumResource.size.width/designResolutionSize.width));
+//     }
+//     // if the frame's height is smaller than the height of medium resource size, select small resource.
+// 	else
+//     {
+//         searchPath.push_back(smallResource.directory);
+// 
+//         pDirector->setContentScaleFactor(MIN(smallResource.size.height/designResolutionSize.height, smallResource.size.width/designResolutionSize.width));
+//     }
+// 
 
     // set searching path
+    searchPath.push_back("ani");
+    searchPath.push_back("images");
     CCFileUtils::sharedFileUtils()->setSearchPaths(searchPath);
 	
     // turn on display FPS
@@ -97,8 +101,8 @@ bool AppDelegate::applicationDidFinishLaunching() {
     pDirector->setAnimationInterval(1.0 / 60);
 
     // create a scene. it's an autorelease object
-    CCScene *pScene = HelloWorld::scene();
-
+    CCScene *pScene = CLoadingStage::scene();
+    //CCScene *pScene = HelloWorld::scene();
     // run
     pDirector->runWithScene(pScene);
 

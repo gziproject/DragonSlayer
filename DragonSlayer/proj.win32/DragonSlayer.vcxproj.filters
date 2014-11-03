@@ -9,6 +9,12 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
+    <Filter Include="Classes\Tools">
+      <UniqueIdentifier>{d140ea46-bc9a-452d-ba0c-cda2aeff7476}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Classes\GameStage">
+      <UniqueIdentifier>{db32b2ef-5f79-4a39-8d31-bfd2cd78d51d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Classes\AppDelegate.cpp">
@@ -19,6 +25,45 @@
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\ArmatureLoader.cpp">
+      <Filter>Classes\Tools</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Axe.cpp">
+      <Filter>Classes\GameStage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\BaseObject.cpp">
+      <Filter>Classes\GameStage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\ControlerManager.cpp">
+      <Filter>Classes\GameStage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\GameObject.cpp">
+      <Filter>Classes\GameStage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\GameStage.cpp">
+      <Filter>Classes\GameStage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\GLES-Render.cpp">
+      <Filter>Classes\GameStage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\LoadingStage.cpp">
+      <Filter>Classes\GameStage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Monster.cpp">
+      <Filter>Classes\GameStage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\MonsterManager.cpp">
+      <Filter>Classes\GameStage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\ObjectFactory.cpp">
+      <Filter>Classes\GameStage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\PhysicsObject.cpp">
+      <Filter>Classes\GameStage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Role.cpp">
+      <Filter>Classes\GameStage</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -33,6 +78,48 @@
     </ClInclude>
     <ClInclude Include="..\Classes\AppMacros.h">
       <Filter>Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\ArmatureLoader.h">
+      <Filter>Classes\Tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Role.h">
+      <Filter>Classes\GameStage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Axe.h">
+      <Filter>Classes\GameStage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\BaseObject.h">
+      <Filter>Classes\GameStage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\ControlerManager.h">
+      <Filter>Classes\GameStage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\DGameDef.h">
+      <Filter>Classes\GameStage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\GameObject.h">
+      <Filter>Classes\GameStage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\GameStage.h">
+      <Filter>Classes\GameStage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\GLES-Render.h">
+      <Filter>Classes\GameStage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\LoadingStage.h">
+      <Filter>Classes\GameStage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Monster.h">
+      <Filter>Classes\GameStage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\MonsterManager.h">
+      <Filter>Classes\GameStage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\ObjectFactory.h">
+      <Filter>Classes\GameStage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\PhysicsObject.h">
+      <Filter>Classes\GameStage</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
