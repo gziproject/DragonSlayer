@@ -8,6 +8,9 @@
 
 #define PTM_RATIO                   32
 
+#define MSG_ROLEACOMPLETE           "MsgRoleAComplete"              //玩家攻击动作完成
+#define MSG_UICHANGEAXE             "MsgChangeAxe"                  //玩家点击UI界面, 切换了斧子
+
 enum ERoleType
 {
     ROLETYPE_NONE = 0,                   //什么也不是

@@ -60,7 +60,7 @@ CGameObject *CObjectFactory::CreateObject(int rid)
 
 CPhysicsObject *CObjectFactory::CreateAxe(int rid)
 {
-    CPhysicsObject *pAxe = NULL;
+    CPhysicsObject *pObj = NULL;
     switch (rid)
     {
     case ROLEID_AXE:
@@ -70,7 +70,7 @@ CPhysicsObject *CObjectFactory::CreateAxe(int rid)
     case  ROLEID_BANEAXE:
     case  ROLEID_WINDAXE:
         {
-            pAxe = CAxe::create(rid);   
+            pObj = CAxe::create(rid);   
         }
         break;
 
@@ -78,5 +78,5 @@ CPhysicsObject *CObjectFactory::CreateAxe(int rid)
         break;
     }
 
-    return pAxe;
+    return pObj;
 }

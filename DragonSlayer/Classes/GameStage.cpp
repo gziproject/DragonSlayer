@@ -2,17 +2,33 @@
 #include "GameObject.h"
 #include "ObjectFactory.h"
 #include "GLES-Render.h"
+#include "Axe.h"
+#include "Role.h"
+#include "Monster.h"
+#include "DGameDef.h"
 
 USING_NS_CC;
+using namespace std;
+
+const int COLLIDE_INDEX_OBJECTGROUP =  0x0001;           //物体群体
+const int COLLIDE_INDEX_BULLETGROUP =  0x0002;           //子弹群体
+
+const int COLLIDE_CATEGORY_ROLE =      0x0002;           //角色种类
+const int COLLIDE_MASKBIT_ROLE =       0xFFFF ^ COLLIDE_CATEGORY_ROLE;           //角色碰撞掩码
+
+const int COLLIDE_CATEGORY_MONSTER =   0x0004;           //怪物种类
+const int COLLIDE_MASKBIT_MONSTER =    0xFFFF ^ COLLIDE_CATEGORY_MONSTER;           //怪物碰撞掩码
 
 CGameStage::CGameStage(void)
 {
-    for (int i = 0; i < 16; ++i)
+    for (int i = 0; i < 32; ++i)
     {
-        m_willDestroyBullets[i] = NULL;
+        m_willDestroyBodys[i] = NULL;
     }
 
     m_pRole = NULL;
+    m_nBodyIndex = -1;
+    m_nPoints = 0;
 }
 
 CGameStage::~CGameStage(void)
@@ -47,10 +63,9 @@ bool CGameStage::init()
     GLESDebugDraw *m_debugDraw = new GLESDebugDraw( PTM_RATIO );
     m_debugDraw->SetFlags(b2Draw::e_shapeBit);
     m_b2World->SetDebugDraw(m_debugDraw);
-
     // 批处理节点, 用于加载斧子
     m_pSpriteBatchNode = CCSpriteBatchNode::create("images/00_01.png", 10);
-    addChild(m_pSpriteBatchNode);
+    addChild(m_pSpriteBatchNode, 1);
 
     return true;
 }
@@ -61,18 +76,27 @@ void CGameStage::onEnter()
     setAccelerometerEnabled(true);
 
     CCDirector::sharedDirector()->getTouchDispatcher()->addTargetedDelegate(this, -1, true);
-
     CCSize visibleSize = CCDirector::sharedDirector()->getVisibleSize();
-    
+
     InitFloor();
 
     //读取配置(如果有的话)
     //通过配置添加游戏对象
-    m_pRole = AddBody(ROLEID_HERO, visibleSize.width/2, visibleSize.height/2);
+    m_pRole = dynamic_cast<CRole*>(AddBody(ROLEID_HERO, visibleSize.width/2, visibleSize.height/2));
     if (NULL != m_pRole)
     {
         m_pRole->getAnimation()->playWithIndex(0);
     }
+
+    CGameObject *pTestMons = AddBody(ROLEID_MONSTER, visibleSize.width/2+100, visibleSize.height/2+ 100 );
+    if (NULL != pTestMons)
+    {
+        pTestMons->getAnimation()->playWithIndex(0);
+    }
+
+    //注册消息
+    CCNotificationCenter::sharedNotificationCenter()->addObserver(
+        this, callfuncO_selector(CGameStage::onAttackCallback), MSG_ROLEACOMPLETE, NULL);
 
     scheduleUpdate();
 }
@@ -81,11 +105,70 @@ void CGameStage::onExit()
 {
     CCLayer::onExit();
     CCDirector::sharedDirector()->getTouchDispatcher()->removeDelegate(this);
+    CCNotificationCenter::sharedNotificationCenter()->removeObserver(this, MSG_ROLEACOMPLETE);
 }
 
 void CGameStage::update(float delta)
 {
     m_b2World->Step(delta, 8, 3);
+
+    for (int32 i = 0; i < m_nPoints; ++i)
+    {
+        SContactPoint* point = m_ContactPoints + i;
+
+        b2Body* pBody1 = point->fixtureA->GetBody();
+        b2Body* pBody2 = point->fixtureB->GetBody();
+        CBaseObject *pObj1 = reinterpret_cast<CBaseObject*>(pBody1->GetUserData());
+        CBaseObject *pObj2 = reinterpret_cast<CBaseObject*>(pBody2->GetUserData());
+
+        CAxe *pAxe = NULL;
+        CMonster *pMonster = NULL;
+
+        if (pObj1 && pObj1->GetRoleType() == ROLETYPE_AXE 
+            && pObj2 && pObj2->GetRoleType() == ROLETYPE_MONSTER)
+        {
+            pAxe = dynamic_cast<CAxe*>(pObj1);
+            pMonster = dynamic_cast<CMonster*>(pObj2);
+
+            m_ReleaseList.insert(pAxe);
+            m_willDestroyBodys[++m_nBodyIndex] = pBody1;
+        }
+        else if (pObj2 && pObj2->GetRoleType() == ROLETYPE_AXE
+            && pObj1 && pObj1->GetRoleType() == ROLETYPE_MONSTER)
+        {
+            pAxe = dynamic_cast<CAxe*>(pObj2);
+            pMonster = dynamic_cast<CMonster*>(pObj1);
+
+            m_ReleaseList.insert(pAxe);
+            m_willDestroyBodys[++m_nBodyIndex] = pBody2;
+        }
+    }
+
+    int count = m_nBodyIndex + 1;
+    std::sort(m_willDestroyBodys, m_willDestroyBodys + count);
+
+    if (m_nBodyIndex >= 0)
+    {
+        while (m_nBodyIndex >= 0)
+        {
+            b2Body *pWillDes = m_willDestroyBodys[m_nBodyIndex--];
+            while (m_nBodyIndex > -1  && m_willDestroyBodys[m_nBodyIndex] == pWillDes)
+            {
+                --m_nBodyIndex;
+            }
+
+            m_b2World->DestroyBody(pWillDes);
+        }
+    }
+
+    for (set<CPhysicsObject *>::iterator iter = m_ReleaseList.begin(); 
+        iter != m_ReleaseList.end(); ++iter)
+    {
+        CAxe *pAxe = dynamic_cast<CAxe*>(*iter);
+        pAxe->RemoveSelf();
+    }
+
+    m_nPoints = 0;
 }
 
 void CGameStage::draw()
@@ -115,13 +198,43 @@ CGameObject* CGameStage::AddBody(int rid, float x, float y)
 
         b2PolygonShape shape;
         shape.SetAsBox(tempW/2, tempH/2);
+
         b2FixtureDef fixdef;
         fixdef.shape = &shape;
         fixdef.density = 1.0f;
         //fixdef.userData = pObj;
         //fixdef.isSensor = true;
+        //fixdef.filter.groupIndex = 1;
+        if(rid == ROLEID_HERO)
+        {
+            fixdef.filter.categoryBits = COLLIDE_CATEGORY_ROLE;
+            fixdef.filter.maskBits = COLLIDE_MASKBIT_ROLE;
+        }
+        else
+        {
+            fixdef.filter.categoryBits = COLLIDE_CATEGORY_MONSTER;
+            fixdef.filter.maskBits = COLLIDE_MASKBIT_MONSTER;
+        }
+
         pBody->CreateFixture(&fixdef);
-        pBody->SetUserData(pObj);
+        pBody->SetUserData((CBaseObject*)pObj);
+
+        if (rid != ROLEID_HERO)
+        {
+            // 让龙在一定的高度从左往右, 或从右往左飞行
+            b2PrismaticJointDef pjd;
+            b2Vec2 axis(1.0f, 0.0f);
+            axis.Normalize();
+            pjd.Initialize(m_groundBody, pBody, b2Vec2(1.0f, 0.0f), axis);
+            pjd.motorSpeed = -1.0f;
+            pjd.maxMotorForce = 1000.0f;
+            pjd.enableMotor = true;
+            pjd.lowerTranslation = 0.0f;
+            pjd.upperTranslation = 20.0f;
+            pjd.enableLimit = false;
+
+            b2PrismaticJoint *pJoint = dynamic_cast<b2PrismaticJoint *>(m_b2World->CreateJoint(&pjd));
+        }
 
         pObj->SetB2body(pBody);
         pObj->setPosition(x, y);
@@ -151,8 +264,22 @@ CPhysicsObject *CGameStage::AddAxe(int rid, float x, float y)
         fixdef.density = 1.0f;
         //fixdef.userData = pObj;
         //fixdef.isSensor = true;
+        //fixdef.filter.groupIndex = 1;
+        if(rid == ROLEID_MONSHIT)
+        {
+            fixdef.filter.categoryBits = COLLIDE_CATEGORY_MONSTER;
+            fixdef.filter.maskBits = COLLIDE_MASKBIT_MONSTER;
+        }
+        else
+        {
+            fixdef.filter.categoryBits = COLLIDE_CATEGORY_ROLE;
+            fixdef.filter.maskBits = COLLIDE_MASKBIT_ROLE;
+        }
+
         pBody->CreateFixture(&fixdef);
-        pBody->SetUserData(pObj);
+        pBody->SetUserData((CBaseObject*)pObj);
+        // 施加旋转的力
+        pBody->ApplyAngularImpulse(1.0f);
 
         pObj->SetB2body(pBody);
         pObj->setPosition(ccp(x, y));
@@ -165,17 +292,7 @@ CPhysicsObject *CGameStage::AddAxe(int rid, float x, float y)
 
 void CGameStage::BeginContact(b2Contact* contact)
 {
-    b2Body *pBody1 = contact->GetFixtureA()->GetBody();
-    b2Body *pBody2 = contact->GetFixtureB()->GetBody();
 
-    CGameObject *pObj1 = (CGameObject*)pBody1->GetUserData();
-    CGameObject *pObj2 = (CGameObject*)pBody2->GetUserData();
-// 
-//     if (pObj1->GetRoleType() == ROLETYPE_BULLET && pObj2->GetRoleType() == ROLETYPE_MONSTER ||
-//         (pObj1->GetRoleType() == ROLETYPE_MONSTER && pObj2->GetRoleType() == ROLETYPE_BULLET))
-//     {
-// 
-//     }
 }
 
 void CGameStage::EndContact(b2Contact* contact)
@@ -185,7 +302,32 @@ void CGameStage::EndContact(b2Contact* contact)
 
 void CGameStage::PreSolve(b2Contact* contact, const b2Manifold* oldManifold)
 {
+    const b2Manifold* manifold = contact->GetManifold();
 
+    if (manifold->pointCount == 0)
+    {
+        return;
+    }
+
+    b2Fixture* fixtureA = contact->GetFixtureA();
+    b2Fixture* fixtureB = contact->GetFixtureB();
+
+    b2PointState state1[b2_maxManifoldPoints], state2[b2_maxManifoldPoints];
+    b2GetPointStates(state1, state2, oldManifold, manifold);
+
+    b2WorldManifold worldManifold;
+    contact->GetWorldManifold(&worldManifold);
+
+    for (int32 i = 0; i < manifold->pointCount; ++i)
+    {
+        SContactPoint* cp = m_ContactPoints + m_nPoints;
+        cp->fixtureA = fixtureA;
+        cp->fixtureB = fixtureB;
+        cp->position = worldManifold.points[i];
+        cp->normal = worldManifold.normal;
+        cp->state = state2[i];
+        ++m_nPoints;
+    }
 }
 
 void CGameStage::PostSolve(b2Contact* contact, const b2ContactImpulse* impulse)
@@ -198,24 +340,10 @@ bool CGameStage::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
     CCSize visibleSize = CCDirector::sharedDirector()->getWinSize();
     CCPoint pos = pTouch->getLocation();
 
-    //AddTestBoxAtPos(pos.x, pos.y);
-
-    //CGameObject *obj = AddBody(ROLEID_HERO, pos.x, pos.y);
-//     CGameObject *obj = AddBody(ROLEID_MONSTER, pos.x, pos.y);
-//     if (obj!=NULL)
-//     {
-//         obj->getAnimation()->playWithIndex(0);
-//     }
-
-    AddAxe(ROLEID_NORMAXE, pos.x, pos.y);
-
-    if (pos.x > visibleSize.width/2)
+    // 是否需要攻击条件
+    if (m_pRole->IsReload())
     {
-        ApplyLeftForce(2000.0f);
-    }
-    else
-    {
-        ApplyRightForce(2000.0f);
+        OnAttackMonster();
     }
 
     return true;
@@ -237,6 +365,14 @@ void CGameStage::didAccelerate(cocos2d::CCAcceleration* pAccelerationValue)
     double &y = pAccelerationValue->y;
 
 
+    //     if (pos.x > visibleSize.width/2)
+    //     {
+    //         ApplyLeftForce(2000.0f);
+    //     }
+    //     else
+    //     {
+    //         ApplyRightForce(2000.0f);
+    //     }
 }
 
 void CGameStage::InitFloor()
@@ -245,24 +381,24 @@ void CGameStage::InitFloor()
     b2BodyDef groundBodyDef;
     groundBodyDef.position.Set(0, 0); // bottom-left corner
 
-    b2Body* groundBody = m_b2World->CreateBody(&groundBodyDef);
+    m_groundBody = m_b2World->CreateBody(&groundBodyDef);
     b2EdgeShape groundBox;
 
     // bottom
     groundBox.Set(b2Vec2(0/PTM_RATIO, 0/PTM_RATIO), b2Vec2(visibleSize.width/PTM_RATIO , 0/PTM_RATIO));
-    groundBody->CreateFixture(&groundBox,0);
+    m_groundBody->CreateFixture(&groundBox,0);
 
     // top
     groundBox.Set(b2Vec2(0/PTM_RATIO, visibleSize.height/PTM_RATIO), b2Vec2(visibleSize.width/PTM_RATIO, visibleSize.height/PTM_RATIO));
-    groundBody->CreateFixture(&groundBox,0);
+    m_groundBody->CreateFixture(&groundBox,0);
 
     // left
     groundBox.Set(b2Vec2(0/PTM_RATIO, visibleSize.height/PTM_RATIO), b2Vec2(0/PTM_RATIO, 0/PTM_RATIO));
-    groundBody->CreateFixture(&groundBox,0);
+    m_groundBody->CreateFixture(&groundBox,0);
 
     // right
     groundBox.Set(b2Vec2(visibleSize.width/PTM_RATIO, 0/PTM_RATIO), b2Vec2(visibleSize.width/PTM_RATIO, visibleSize.height/PTM_RATIO));
-    groundBody->CreateFixture(&groundBox,0);
+    m_groundBody->CreateFixture(&groundBox,0);
 }
 
 void CGameStage::AddTestBoxAtPos(float x, float y)
@@ -291,4 +427,26 @@ void CGameStage::ApplyRightForce(float fForce)
     b2Body *pPlayerBody = m_pRole->GetB2body();
     b2Vec2 f = pPlayerBody->GetWorldVector(b2Vec2(fForce, 0.0f));
     pPlayerBody->ApplyForceToCenter(f);
+}
+
+void CGameStage::OnAttackMonster()
+{
+    m_pRole->ThrowAxe();
+}
+
+void CGameStage::onAttackCallback(cocos2d::CCObject *pObj)
+{
+    // 获得角度, 力度, 发射斧头
+    float angles = 0.0f;
+    float power = 0.0f;
+    float x = m_pRole->getPositionX() + 50;
+    float y = m_pRole->getPositionY();
+
+    b2Vec2 v2Force = b2Vec2(-200.0f, 800.0f);
+    CPhysicsObject *pAxe = AddAxe(ROLEID_NORMAXE, x, y);
+    if (NULL != pAxe)
+    {
+        b2Body *pBody = pAxe->GetB2body();
+        pBody->ApplyForce(v2Force, pBody->GetPosition());
+    }
 }

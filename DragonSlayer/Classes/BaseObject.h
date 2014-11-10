@@ -1,6 +1,8 @@
 #ifndef __BASEOBJECT_H__
 #define __BASEOBJECT_H__
 
+#include "DGameDef.h"
+
 class CBaseObject
 {
 public:
@@ -8,10 +10,10 @@ public:
     virtual ~CBaseObject(void);
 
     // 角色类型
-    virtual int GetRoleType();
+    virtual int GetRoleType() { return ROLETYPE_NONE; }
     // 角色ID
     virtual void SetRoleID(int rid) { m_nRoleID = rid; }
-    virtual int GetRoleID();
+    virtual int GetRoleID() { return m_nRoleID; }
 
 protected:
 

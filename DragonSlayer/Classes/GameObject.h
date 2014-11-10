@@ -24,7 +24,7 @@ public:
     // 获得刚体
     virtual b2Body *GetB2body() { return m_pB2body; }
     // 通过名字播放动作
-    virtual void PlayAction(const char *szActionName);
+    virtual void PlayAction(const char *szActionName, int durationTo = -1, int durationTween = -1,  int loop = -1, int tweenEasing = 10000);
     // 根据骨骼动画尺寸转换成物理世界的大小
     virtual float GetB2Width();
     virtual float GetB2Height();

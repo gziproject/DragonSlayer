@@ -38,12 +38,12 @@ CGameObject* CGameObject::create(int rid)
 }
 
 
-void CGameObject::PlayAction(const char *szActionName)
+void CGameObject::PlayAction(const char *szActionName, int durationTo, int durationTween,  int loop, int tweenEasing)
 {
     // 提前做判断, 不让程序奔溃
     if (getAnimation()->getAnimationData()->getMovement(szActionName) != NULL)
     {
-        getAnimation()->play(szActionName);
+        getAnimation()->play(szActionName, durationTo, durationTween, loop, tweenEasing);
     }
 }
 
@@ -75,11 +75,11 @@ void CGameObject::update(float dt)
     if (m_pB2body!= NULL)
     {
         b2Vec2 vPos = m_pB2body->GetPosition();
-        CCLog("box2d obj pos: x=%f, y=%f", vPos.x, vPos.y);
+//        CCLog("box2d obj pos: x=%f, y=%f", vPos.x, vPos.y);
         setPosition(vPos.x* PTM_RATIO,  vPos.y * PTM_RATIO);
-
-        CCLog("player obj pos: x=%f, y=%f", getPositionX(), getPositionY());
-        CCLog("player obj anchor: x=%f, y=%f", getAnchorPoint().x, getAnchorPoint().y);
-        CCLog("player obj w=%f, h=%f", GetB2Width(), GetB2Height());
+// 
+//         CCLog("player obj pos: x=%f, y=%f", getPositionX(), getPositionY());
+//         CCLog("player obj anchor: x=%f, y=%f", getAnchorPoint().x, getAnchorPoint().y);
+//         CCLog("player obj w=%f, h=%f", GetB2Width(), GetB2Height());
     }
 }
