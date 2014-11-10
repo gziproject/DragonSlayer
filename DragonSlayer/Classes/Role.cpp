@@ -8,6 +8,7 @@ CRole::CRole(void)
 {
     m_fB2Width = 2.2f;
     m_fB2Height = 3.0f;
+    m_nAxeType = ROLEID_NORMAXE;
     m_bIsReload = true;
 }
 
@@ -58,7 +59,7 @@ void CRole::onEnter()
 
     getBone("00")->changeDisplayWithIndex(0, true);
     getBone("00")->setOpacity(0.0f);
-    getBone("00")->setScale(0.8f);
+    //getBone("00")->setScale(0.8f);
 }
 
 void CRole::onExit()
@@ -78,7 +79,6 @@ void CRole::ThrowAxe()
     getAnimation()->stop();
     getBone("00")->setOpacity(255.0f);
     PlayAction("Attack", -1, -1, 0);
-
 }
 
 void CRole::OnMovementEvent(CCArmature *armature, MovementEventType movementType, const char * movementID)
@@ -109,5 +109,6 @@ void CRole::OnChangeAxe(CCObject *pObj)
     int nTag = dynamic_cast<CCNode*>(pObj)->getTag();
     int index = nTag - ROLEID_NORMAXE;
 
+    m_nAxeType = nTag;
     getBone("00")->changeDisplayWithIndex(index, true);
 }

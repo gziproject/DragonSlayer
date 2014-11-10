@@ -141,6 +141,7 @@
     <ClCompile Include="..\Classes\PhysicsObject.cpp" />
     <ClCompile Include="..\Classes\PlayerAccount.cpp" />
     <ClCompile Include="..\Classes\Role.cpp" />
+    <ClCompile Include="GameUILayer.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -165,6 +166,7 @@
     <ClInclude Include="..\Classes\PlayerAccount.h" />
     <ClInclude Include="..\Classes\Role.h" />
     <ClInclude Include="DConfigDef.h" />
+    <ClInclude Include="GameUILayer.h" />
     <ClInclude Include="main.h" />
   </ItemGroup>
   <ItemGroup>

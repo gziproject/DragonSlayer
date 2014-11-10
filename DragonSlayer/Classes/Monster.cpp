@@ -37,22 +37,35 @@ int CMonster::GetRoleType()
     return ROLETYPE_MONSTER;
 }
 
-void CMonster::Injure(int power)
+float CMonster::Injure(int power)
 {
-    CCTintTo *pTint = CCTintTo::create(0.5f, 128, 128, 128);
-    CCSequence *pSeq = CCSequence::create(pTint, pTint->reverse(), NULL);
-    runAction(pSeq);
-
-    //PlayAction(ACTIONNAME_INJURE);
-
     m_fBlood -= power;
     if (m_fBlood <= 0.0f)
     {
         Die();
     }
+
+    return m_fBlood;
 }
 
 void CMonster::Die()
 {
     PlayAction(ACTIONNAME_DIE);
+    b2World *pWorld = m_pB2body->GetWorld();
+
+    b2JointEdge *pJoints = m_pB2body->GetJointList();
+    while (pJoints != NULL)
+    {
+        b2Joint *destroy = pJoints->joint;
+        pJoints = pJoints->next;
+
+        pWorld->DestroyJoint(destroy);
+    }
+
+    // 设置不与角色, 斧头碰撞
+    b2Fixture *pFixture = m_pB2body->GetFixtureList();
+    b2Filter filer;
+    filer.categoryBits = COLLIDE_CATEGORY_ROLE;
+    filer.maskBits = COLLIDE_MASKBIT_ROLE;
+    pFixture->SetFilterData(filer);
 }

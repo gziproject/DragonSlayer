@@ -19,9 +19,11 @@ public:
 
     // 角色类型
     virtual int GetRoleType();
+    // 获得斧子类型
+    int GetAxeType() { return m_nAxeType; }
     // 投掷斧子
     void ThrowAxe();
-    // 是否加载完成
+    // 重新载入斧子是否完成
     bool IsReload() { return m_bIsReload; }
 
 private:
@@ -31,6 +33,7 @@ private:
 
 private:
 
+    int m_nAxeType;
     bool m_bIsReload;
 };
 

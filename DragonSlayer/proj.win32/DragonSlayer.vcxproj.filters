@@ -74,6 +74,9 @@
     <ClCompile Include="..\Classes\GameConfig.cpp">
       <Filter>Classes</Filter>
     </ClCompile>
+    <ClCompile Include="GameUILayer.cpp">
+      <Filter>Classes\GameStage</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Classes\AppDelegate.h">
@@ -141,6 +144,9 @@
     </ClInclude>
     <ClInclude Include="..\Classes\GameConfig.h">
       <Filter>Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="GameUILayer.h">
+      <Filter>Classes\GameStage</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

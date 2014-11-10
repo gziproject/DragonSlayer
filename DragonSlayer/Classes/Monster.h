@@ -13,7 +13,7 @@ public:
     // ½ÇÉ«ÀàÐÍ
     virtual int GetRoleType();
     //
-    virtual void Injure(int power);
+    virtual float Injure(int power);
     //
     virtual void Die();
 };

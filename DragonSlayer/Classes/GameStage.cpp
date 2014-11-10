@@ -6,18 +6,10 @@
 #include "Role.h"
 #include "Monster.h"
 #include "DGameDef.h"
+#include "GameUILayer.h"
 
 USING_NS_CC;
 using namespace std;
-
-const int COLLIDE_INDEX_OBJECTGROUP =  0x0001;           //物体群体
-const int COLLIDE_INDEX_BULLETGROUP =  0x0002;           //子弹群体
-
-const int COLLIDE_CATEGORY_ROLE =      0x0002;           //角色种类
-const int COLLIDE_MASKBIT_ROLE =       0xFFFF ^ COLLIDE_CATEGORY_ROLE;           //角色碰撞掩码
-
-const int COLLIDE_CATEGORY_MONSTER =   0x0004;           //怪物种类
-const int COLLIDE_MASKBIT_MONSTER =    0xFFFF ^ COLLIDE_CATEGORY_MONSTER;           //怪物碰撞掩码
 
 CGameStage::CGameStage(void)
 {
@@ -82,7 +74,7 @@ void CGameStage::onEnter()
 
     //读取配置(如果有的话)
     //通过配置添加游戏对象
-    m_pRole = dynamic_cast<CRole*>(AddBody(ROLEID_HERO, visibleSize.width/2, visibleSize.height/2));
+    m_pRole = dynamic_cast<CRole*>(AddBody(ROLEID_HERO, visibleSize.width/2 + 100, visibleSize.height/2));
     if (NULL != m_pRole)
     {
         m_pRole->getAnimation()->playWithIndex(0);
@@ -124,20 +116,36 @@ void CGameStage::update(float delta)
         CAxe *pAxe = NULL;
         CMonster *pMonster = NULL;
 
-        if (pObj1 && pObj1->GetRoleType() == ROLETYPE_AXE 
-            && pObj2 && pObj2->GetRoleType() == ROLETYPE_MONSTER)
+        // 碰到地板的, 除了英雄自己, 无论什么东西都删除
+        if (pObj1 == NULL && pObj2->GetRoleType() != ROLETYPE_HERO)
+        {
+            m_willDestroyBodys[++m_nBodyIndex] = pBody2;
+            CCNode* pRm = dynamic_cast<CCNode*>(pObj2);
+            pRm->removeFromParentAndCleanup(true);
+
+        }
+        else if (pObj2 == NULL && pObj1->GetRoleType() != ROLETYPE_HERO)
+        {
+            m_willDestroyBodys[++m_nBodyIndex] = pBody1;
+            CCNode* pRm = dynamic_cast<CCNode*>(pObj1);
+            pRm->removeFromParentAndCleanup(true);
+        }
+        else if (pObj1 && pObj1->GetRoleType() == ROLETYPE_AXE && 
+            pObj2 && pObj2->GetRoleType() == ROLETYPE_MONSTER)
         {
             pAxe = dynamic_cast<CAxe*>(pObj1);
             pMonster = dynamic_cast<CMonster*>(pObj2);
+            pMonster->Injure(pAxe->GetPower());
 
             m_ReleaseList.insert(pAxe);
             m_willDestroyBodys[++m_nBodyIndex] = pBody1;
         }
-        else if (pObj2 && pObj2->GetRoleType() == ROLETYPE_AXE
+        else if (pObj2 && pObj2->GetRoleType() == ROLETYPE_AXE 
             && pObj1 && pObj1->GetRoleType() == ROLETYPE_MONSTER)
         {
             pAxe = dynamic_cast<CAxe*>(pObj2);
             pMonster = dynamic_cast<CMonster*>(pObj1);
+            pMonster->Injure(pAxe->GetPower());
 
             m_ReleaseList.insert(pAxe);
             m_willDestroyBodys[++m_nBodyIndex] = pBody2;
@@ -384,20 +392,23 @@ void CGameStage::InitFloor()
     m_groundBody = m_b2World->CreateBody(&groundBodyDef);
     b2EdgeShape groundBox;
 
+    float height = visibleSize.height * 2;
+    float width = visibleSize.width * 2;
+
     // bottom
-    groundBox.Set(b2Vec2(0/PTM_RATIO, 0/PTM_RATIO), b2Vec2(visibleSize.width/PTM_RATIO , 0/PTM_RATIO));
+    groundBox.Set(b2Vec2((-1*width/2)/PTM_RATIO, 0/PTM_RATIO), b2Vec2(width+(-1*width/2)/PTM_RATIO , 0/PTM_RATIO));
     m_groundBody->CreateFixture(&groundBox,0);
 
     // top
-    groundBox.Set(b2Vec2(0/PTM_RATIO, visibleSize.height/PTM_RATIO), b2Vec2(visibleSize.width/PTM_RATIO, visibleSize.height/PTM_RATIO));
+    groundBox.Set(b2Vec2((-1*width/2)/PTM_RATIO, height/PTM_RATIO), b2Vec2(width +(-1*width/2)/PTM_RATIO, height/PTM_RATIO));
     m_groundBody->CreateFixture(&groundBox,0);
 
     // left
-    groundBox.Set(b2Vec2(0/PTM_RATIO, visibleSize.height/PTM_RATIO), b2Vec2(0/PTM_RATIO, 0/PTM_RATIO));
+    groundBox.Set(b2Vec2((-1*width/2)/PTM_RATIO, height/PTM_RATIO), b2Vec2((-1*width/2)/PTM_RATIO, 0/PTM_RATIO));
     m_groundBody->CreateFixture(&groundBox,0);
 
     // right
-    groundBox.Set(b2Vec2(visibleSize.width/PTM_RATIO, 0/PTM_RATIO), b2Vec2(visibleSize.width/PTM_RATIO, visibleSize.height/PTM_RATIO));
+    groundBox.Set(b2Vec2(width+ (-1*width/2)/PTM_RATIO, 0/PTM_RATIO), b2Vec2(width+(-1*width/2)/PTM_RATIO, height/PTM_RATIO));
     m_groundBody->CreateFixture(&groundBox,0);
 }
 
@@ -442,7 +453,7 @@ void CGameStage::onAttackCallback(cocos2d::CCObject *pObj)
     float x = m_pRole->getPositionX() + 50;
     float y = m_pRole->getPositionY();
 
-    b2Vec2 v2Force = b2Vec2(-200.0f, 800.0f);
+    b2Vec2 v2Force = b2Vec2(-200.0f, 700.0f);
     CPhysicsObject *pAxe = AddAxe(ROLEID_NORMAXE, x, y);
     if (NULL != pAxe)
     {
