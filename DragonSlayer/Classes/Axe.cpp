@@ -6,7 +6,7 @@ USING_NS_CC;
 
 CAxe::CAxe(void)
 {
-    m_fB2Radius = 0.5f;
+    m_fB2Radius = 1.5f;
     m_fPower = 100.0f;
     m_fExtraPower = 0.0f;
 }
@@ -73,5 +73,5 @@ void CAxe::RemoveSelf()
 void CAxe::onEnter()
 {
     CPhysicsObject::onEnter();
-    setScale(0.5f);
+    //setScale(0.5f);
 }

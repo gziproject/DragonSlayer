@@ -14,12 +14,9 @@ public:
 
     void onEnter();
     void onExit();
+    CREATE_FUNC(CGameUILayer);
 
 private:
-
-    cocos2d::CCMenuItemSprite *initMenuItemWithFiles(const char *normal, const char *selected, const char *disable, cocos2d::SEL_MenuHandler selector);
-
-    void onSelectedMenuItem(cocos2d::CCObject *pSender);
 
 };
 

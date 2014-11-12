@@ -6,8 +6,8 @@ USING_NS_CC_EXT;
 
 CRole::CRole(void)
 {
-    m_fB2Width = 2.2f;
-    m_fB2Height = 3.0f;
+    m_fB2Width = 4.4f;
+    m_fB2Height = 6.0f;
     m_nAxeType = ROLEID_NORMAXE;
     m_bIsReload = true;
 }

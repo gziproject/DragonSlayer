@@ -7,6 +7,7 @@
 #include "Monster.h"
 #include "DGameDef.h"
 #include "GameUILayer.h"
+#include <time.h>
 
 USING_NS_CC;
 using namespace std;
@@ -47,8 +48,10 @@ bool CGameStage::init()
 {
     CCLayer::init();
 
+    CCSize visiableView = CCDirector::sharedDirector()->getWinSize();
+
     b2Vec2 gravity;
-    gravity.Set(0.0f, -10.0f);
+    gravity.Set(0.0f, -12.0f);
     m_b2World = new b2World(gravity);
     m_b2World->SetContactListener(this);
 
@@ -58,6 +61,16 @@ bool CGameStage::init()
     // 批处理节点, 用于加载斧子
     m_pSpriteBatchNode = CCSpriteBatchNode::create("images/00_01.png", 10);
     addChild(m_pSpriteBatchNode, 1);
+
+    // 背景图片
+    CCSprite *pBg = CCSprite::create("scene_01_01.png");
+    addChild(pBg, -1);
+    pBg->setPosition(ccp(visiableView.width/2, visiableView.height/2));
+    
+    // ui层
+    CGameUILayer *pUILayer = CGameUILayer::create();
+    addChild(pUILayer, 2);
+    pUILayer->setPosition(CCPointZero);
 
     return true;
 }
@@ -74,21 +87,33 @@ void CGameStage::onEnter()
 
     //读取配置(如果有的话)
     //通过配置添加游戏对象
-    m_pRole = dynamic_cast<CRole*>(AddBody(ROLEID_HERO, visibleSize.width/2 + 100, visibleSize.height/2));
+    m_pRole = dynamic_cast<CRole*>(AddBody(ROLEID_HERO, visibleSize.width/2 + 100, 400));
     if (NULL != m_pRole)
     {
         m_pRole->getAnimation()->playWithIndex(0);
     }
 
-    CGameObject *pTestMons = AddBody(ROLEID_MONSTER, visibleSize.width/2+100, visibleSize.height/2+ 100 );
-    if (NULL != pTestMons)
+    for (int i = 0; i < 10; ++i)
     {
-        pTestMons->getAnimation()->playWithIndex(0);
+        float x = visibleSize.width/2 + 100 * i;
+        float y = visibleSize.height/2;
+
+        CGameObject *pTestMons = AddBody(ROLEID_MONSTER, x, y);
+        if (NULL != pTestMons)
+        {
+            pTestMons->getAnimation()->playWithIndex(0);
+        }
     }
+    
 
     //注册消息
     CCNotificationCenter::sharedNotificationCenter()->addObserver(
         this, callfuncO_selector(CGameStage::onAttackCallback), MSG_ROLEACOMPLETE, NULL);
+
+//     //////////////////////////////////////////////////////////////////////////
+//     CCSprite *pTestZero = CCSprite::create("CloseNormal.png");
+//     addChild(pTestZero);
+//     pTestZero->setPosition(CCPointZero);
 
     scheduleUpdate();
 }
@@ -287,7 +312,7 @@ CPhysicsObject *CGameStage::AddAxe(int rid, float x, float y)
         pBody->CreateFixture(&fixdef);
         pBody->SetUserData((CBaseObject*)pObj);
         // 施加旋转的力
-        pBody->ApplyAngularImpulse(1.0f);
+        pBody->ApplyAngularImpulse(20.0f);
 
         pObj->SetB2body(pBody);
         pObj->setPosition(ccp(x, y));
@@ -395,8 +420,9 @@ void CGameStage::InitFloor()
     float height = visibleSize.height * 2;
     float width = visibleSize.width * 2;
 
+    float boatHeight = 390.0f;
     // bottom
-    groundBox.Set(b2Vec2((-1*width/2)/PTM_RATIO, 0/PTM_RATIO), b2Vec2(width+(-1*width/2)/PTM_RATIO , 0/PTM_RATIO));
+    groundBox.Set(b2Vec2((-1*width/2)/PTM_RATIO, boatHeight/PTM_RATIO), b2Vec2(width+(-1*width/2)/PTM_RATIO , boatHeight/PTM_RATIO));
     m_groundBody->CreateFixture(&groundBox,0);
 
     // top
@@ -404,11 +430,12 @@ void CGameStage::InitFloor()
     m_groundBody->CreateFixture(&groundBox,0);
 
     // left
-    groundBox.Set(b2Vec2((-1*width/2)/PTM_RATIO, height/PTM_RATIO), b2Vec2((-1*width/2)/PTM_RATIO, 0/PTM_RATIO));
+    groundBox.Set(b2Vec2((-1*width/2)/PTM_RATIO, height/PTM_RATIO), b2Vec2((-1*width/2)/PTM_RATIO, boatHeight/PTM_RATIO));
     m_groundBody->CreateFixture(&groundBox,0);
 
     // right
-    groundBox.Set(b2Vec2(width+ (-1*width/2)/PTM_RATIO, 0/PTM_RATIO), b2Vec2(width+(-1*width/2)/PTM_RATIO, height/PTM_RATIO));
+    groundBox.Set(b2Vec2(width+ (-1*width/2)/PTM_RATIO, boatHeight/PTM_RATIO), b2Vec2(width+(-1*width/2)/PTM_RATIO, height/PTM_RATIO));
+
     m_groundBody->CreateFixture(&groundBox,0);
 }
 
@@ -453,7 +480,7 @@ void CGameStage::onAttackCallback(cocos2d::CCObject *pObj)
     float x = m_pRole->getPositionX() + 50;
     float y = m_pRole->getPositionY();
 
-    b2Vec2 v2Force = b2Vec2(-200.0f, 700.0f);
+    b2Vec2 v2Force = b2Vec2(-2000.0f, 15500.0f);
     CPhysicsObject *pAxe = AddAxe(ROLEID_NORMAXE, x, y);
     if (NULL != pAxe)
     {

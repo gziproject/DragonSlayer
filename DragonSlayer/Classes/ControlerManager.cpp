@@ -43,7 +43,10 @@ float CControlerManager::GetShootAngle()
 
 int CControlerManager::GetShootForce()
 {
-    // 通过ui接口可以获得射击力度
     return m_nShootForce;
 }
 
+void CControlerManager::SetShootForce(int force) 
+{ 
+    m_nShootForce = force;
+}

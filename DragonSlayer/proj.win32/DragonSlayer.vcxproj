@@ -131,6 +131,7 @@
     <ClCompile Include="..\Classes\CsvLoader.cpp" />
     <ClCompile Include="..\Classes\GameObject.cpp" />
     <ClCompile Include="..\Classes\GameStage.cpp" />
+    <ClCompile Include="..\Classes\GameUILayer.cpp" />
     <ClCompile Include="..\Classes\GLES-Render.cpp" />
     <ClCompile Include="..\Classes\GameConfig.cpp" />
     <ClCompile Include="..\Classes\HelloWorldScene.cpp" />
@@ -141,7 +142,7 @@
     <ClCompile Include="..\Classes\PhysicsObject.cpp" />
     <ClCompile Include="..\Classes\PlayerAccount.cpp" />
     <ClCompile Include="..\Classes\Role.cpp" />
-    <ClCompile Include="GameUILayer.cpp" />
+    <ClCompile Include="..\Classes\Waterpump.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -155,6 +156,7 @@
     <ClInclude Include="..\Classes\DGameDef.h" />
     <ClInclude Include="..\Classes\GameObject.h" />
     <ClInclude Include="..\Classes\GameStage.h" />
+    <ClInclude Include="..\Classes\GameUILayer.h" />
     <ClInclude Include="..\Classes\GLES-Render.h" />
     <ClInclude Include="..\Classes\GameConfig.h" />
     <ClInclude Include="..\Classes\HelloWorldScene.h" />
@@ -165,8 +167,8 @@
     <ClInclude Include="..\Classes\PhysicsObject.h" />
     <ClInclude Include="..\Classes\PlayerAccount.h" />
     <ClInclude Include="..\Classes\Role.h" />
+    <ClInclude Include="..\Classes\Waterpump.h" />
     <ClInclude Include="DConfigDef.h" />
-    <ClInclude Include="GameUILayer.h" />
     <ClInclude Include="main.h" />
   </ItemGroup>
   <ItemGroup>

@@ -44,9 +44,6 @@
     <ClCompile Include="..\Classes\GameStage.cpp">
       <Filter>Classes\GameStage</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\GLES-Render.cpp">
-      <Filter>Classes\GameStage</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\LoadingStage.cpp">
       <Filter>Classes\GameStage</Filter>
     </ClCompile>
@@ -74,7 +71,13 @@
     <ClCompile Include="..\Classes\GameConfig.cpp">
       <Filter>Classes</Filter>
     </ClCompile>
-    <ClCompile Include="GameUILayer.cpp">
+    <ClCompile Include="..\Classes\GameUILayer.cpp">
+      <Filter>Classes\GameStage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\GLES-Render.cpp">
+      <Filter>Classes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Waterpump.cpp">
       <Filter>Classes\GameStage</Filter>
     </ClCompile>
   </ItemGroup>
@@ -112,9 +115,6 @@
     <ClInclude Include="..\Classes\GameStage.h">
       <Filter>Classes\GameStage</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\GLES-Render.h">
-      <Filter>Classes\GameStage</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\LoadingStage.h">
       <Filter>Classes\GameStage</Filter>
     </ClInclude>
@@ -145,7 +145,13 @@
     <ClInclude Include="..\Classes\GameConfig.h">
       <Filter>Classes</Filter>
     </ClInclude>
-    <ClInclude Include="GameUILayer.h">
+    <ClInclude Include="..\Classes\GameUILayer.h">
+      <Filter>Classes\GameStage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\GLES-Render.h">
+      <Filter>Classes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Waterpump.h">
       <Filter>Classes\GameStage</Filter>
     </ClInclude>
   </ItemGroup>

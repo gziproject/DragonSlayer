@@ -1,3 +1,9 @@
 #不提交.suo 和.sdf文件
 *.suo
+*.opensdf
 *.sdf
+Design/doc/~$_鎴樻枟绯荤粺9.28.docx
+Debug.win32/DragonSlayer.ilk
+Debug.win32/DragonSlayer.pdb
+DragonSlayer/proj.win32/DragonSlayer.suo
+DragonSlayer/proj.win32/DragonSlayer.suo

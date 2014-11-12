@@ -60,7 +60,6 @@ float CGameObject::GetB2Height()
 void CGameObject::onEnter()
 {
     CCArmature::onEnter();
-    setScale(0.5);
 }
 
 void CGameObject::onExit()

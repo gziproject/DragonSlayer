@@ -19,6 +19,7 @@ public:
     float GetShootAngle();
     // 获得射击力度
     int GetShootForce();
+    void SetShootForce(int force);
 
 private:
 

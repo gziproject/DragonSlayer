@@ -8,18 +8,20 @@
 
 #define PTM_RATIO                   32
 
-#define MSG_ROLEACOMPLETE           "MsgRoleAComplete"              //玩家攻击动作完成
-#define MSG_UICHANGEAXE             "MsgChangeAxe"                  //玩家点击UI界面, 切换了斧子
+#define MSG_ROLEACOMPLETE           "MsgRoleAComplete"                        //玩家攻击动作完成
+#define MSG_UICHANGEAXE             "MsgChangeAxe"                            //玩家点击UI界面, 切换了斧子
 
+static const int COLLIDE_INDEX_OBJECTGROUP =  0x0001;                                //物体群体
+static const int COLLIDE_INDEX_BULLETGROUP =  0x0002;                                //子弹群体
 
-const int COLLIDE_INDEX_OBJECTGROUP =  0x0001;           //物体群体
-const int COLLIDE_INDEX_BULLETGROUP =  0x0002;           //子弹群体
+static const int COLLIDE_CATEGORY_ROLE =      0x0002;                                //角色种类
+static const int COLLIDE_MASKBIT_ROLE =       0xFFFF ^ COLLIDE_CATEGORY_ROLE;        //角色碰撞掩码
 
-const int COLLIDE_CATEGORY_ROLE =      0x0002;           //角色种类
-const int COLLIDE_MASKBIT_ROLE =       0xFFFF ^ COLLIDE_CATEGORY_ROLE;           //角色碰撞掩码
+static const int COLLIDE_CATEGORY_MONSTER =   0x0004;                                //怪物种类
+static const int COLLIDE_MASKBIT_MONSTER =    0xFFFF ^ COLLIDE_CATEGORY_MONSTER;     //怪物碰撞掩码
 
-const int COLLIDE_CATEGORY_MONSTER =   0x0004;           //怪物种类
-const int COLLIDE_MASKBIT_MONSTER =    0xFFFF ^ COLLIDE_CATEGORY_MONSTER;           //怪物碰撞掩码
+// fonts
+static const char *szFontAxeCnt = "";
 
 enum ERoleType
 {
