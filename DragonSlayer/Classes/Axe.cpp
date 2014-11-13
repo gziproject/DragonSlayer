@@ -6,7 +6,7 @@ USING_NS_CC;
 
 CAxe::CAxe(void)
 {
-    m_fB2Radius = 1.5f;
+    m_fB2Radius = 0.8f;
     m_fPower = 100.0f;
     m_fExtraPower = 0.0f;
 }

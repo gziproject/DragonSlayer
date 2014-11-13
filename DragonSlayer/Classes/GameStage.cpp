@@ -7,11 +7,27 @@
 #include "Monster.h"
 #include "DGameDef.h"
 #include "GameUILayer.h"
+#include "ControlerManager.h"
 #include <time.h>
 
 USING_NS_CC;
 using namespace std;
 
+struct SAxeFromTexture
+{
+    float x;
+    float y;
+    float width;
+    float height;
+};
+
+static const SAxeFromTexture m_AxeInfo[5] = {
+    {0, 0,  115, 81}, 
+    {0, 81, 160, 112}, 
+    {0,193, 160, 90},
+    {0,283, 165, 81},
+    {0,364, 148, 83}
+};
 CGameStage::CGameStage(void)
 {
     for (int i = 0; i < 32; ++i)
@@ -51,7 +67,7 @@ bool CGameStage::init()
     CCSize visiableView = CCDirector::sharedDirector()->getWinSize();
 
     b2Vec2 gravity;
-    gravity.Set(0.0f, -12.0f);
+    gravity.Set(0.0f, -10.0f);
     m_b2World = new b2World(gravity);
     m_b2World->SetContactListener(this);
 
@@ -59,7 +75,7 @@ bool CGameStage::init()
     m_debugDraw->SetFlags(b2Draw::e_shapeBit);
     m_b2World->SetDebugDraw(m_debugDraw);
     // 批处理节点, 用于加载斧子
-    m_pSpriteBatchNode = CCSpriteBatchNode::create("images/00_01.png", 10);
+    m_pSpriteBatchNode = CCSpriteBatchNode::create("00_012345.png", 10);
     addChild(m_pSpriteBatchNode, 1);
 
     // 背景图片
@@ -105,15 +121,9 @@ void CGameStage::onEnter()
         }
     }
     
-
     //注册消息
     CCNotificationCenter::sharedNotificationCenter()->addObserver(
         this, callfuncO_selector(CGameStage::onAttackCallback), MSG_ROLEACOMPLETE, NULL);
-
-//     //////////////////////////////////////////////////////////////////////////
-//     CCSprite *pTestZero = CCSprite::create("CloseNormal.png");
-//     addChild(pTestZero);
-//     pTestZero->setPosition(CCPointZero);
 
     scheduleUpdate();
 }
@@ -312,11 +322,18 @@ CPhysicsObject *CGameStage::AddAxe(int rid, float x, float y)
         pBody->CreateFixture(&fixdef);
         pBody->SetUserData((CBaseObject*)pObj);
         // 施加旋转的力
-        pBody->ApplyAngularImpulse(20.0f);
+        pBody->ApplyAngularImpulse(2.0f);
 
         pObj->SetB2body(pBody);
         pObj->setPosition(ccp(x, y));
-        pObj->initWithTexture(m_pSpriteBatchNode->getTexture());
+        
+        CCRect rect;
+        int index = rid - ROLEID_AXE - 1;
+        rect.origin.x = m_AxeInfo[index].x;
+        rect.origin.y = m_AxeInfo[index].y;
+        rect.size.width = m_AxeInfo[index].width;
+        rect.size.height = m_AxeInfo[index].height;
+        pObj->initWithTexture(m_pSpriteBatchNode->getTexture(), rect);
         m_pSpriteBatchNode->addChild(pObj);
     }
 
@@ -476,12 +493,12 @@ void CGameStage::onAttackCallback(cocos2d::CCObject *pObj)
 {
     // 获得角度, 力度, 发射斧头
     float angles = 0.0f;
-    float power = 0.0f;
+    float power = CControlerManager::GetInstance()->GetShootForce();
     float x = m_pRole->getPositionX() + 50;
     float y = m_pRole->getPositionY();
 
-    b2Vec2 v2Force = b2Vec2(-2000.0f, 15500.0f);
-    CPhysicsObject *pAxe = AddAxe(ROLEID_NORMAXE, x, y);
+    b2Vec2 v2Force = b2Vec2(-800.0f, power * 700.0f);
+    CPhysicsObject *pAxe = AddAxe(m_pRole->GetAxeType(), x, y);
     if (NULL != pAxe)
     {
         b2Body *pBody = pAxe->GetB2body();

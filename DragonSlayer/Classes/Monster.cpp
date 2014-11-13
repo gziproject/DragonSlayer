@@ -5,8 +5,8 @@ USING_NS_CC;
 
 CMonster::CMonster(void)
 {
-    m_fB2Width = 5.0f;
-    m_fB2Height = 3.0f;
+    m_fB2Width = 2.5f;
+    m_fB2Height = 1.5f;
 }
 
 CMonster::~CMonster(void)

@@ -2,8 +2,6 @@
 
 USING_NS_CC;
 
-#define PTM_RATIO 32
-
 CPhysicsObject::CPhysicsObject(void)
 {
     m_pB2body = NULL;

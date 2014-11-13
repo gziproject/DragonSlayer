@@ -1,5 +1,7 @@
 #include "Waterpump.h"
 #include "DGameDef.h"
+#include "ControlerManager.h"
+#include <string.h>
 
 USING_NS_CC;
 
@@ -11,6 +13,11 @@ static const int Tag_ItemFnt = 1000;
 
 CWaterpump::CWaterpump(void)
 {
+    m_pIndicator = NULL;
+    m_pPump = NULL;
+    m_pFuryPower = NULL;
+    m_nCurFuryPower = 0;
+    m_nMaxFuryPower = 100;
 }
 
 CWaterpump::~CWaterpump(void)
@@ -31,10 +38,15 @@ void CWaterpump::onEnter()
     this->setContentSize(pumpBg->getContentSize());
 
     // 灌水彩色图
-    CCSprite *pPump = CCSprite::create("UI_01_04.png");
-    pPump->setAnchorPoint(ccp(0.5f, 0.0f));
-    pPump->setPosition(ccp(visiableView.width/2, fBottomHeight));
-    addChild(pPump);
+    CCProgressTo *to1 = CCProgressTo::create(3, 100);
+    m_pPump = CCProgressTimer::create(CCSprite::create("UI_01_04.png"));
+    m_pPump->setAnchorPoint(ccp(0.5f, 0.0f));
+    m_pPump->setType(kCCProgressTimerTypeBar);
+    m_pPump->setMidpoint(ccp(0,0));
+    m_pPump->setBarChangeRate(ccp(0, 1));
+    m_pPump->setPosition(ccp(visiableView.width/2 + 1, fBottomHeight));
+    m_pPump->runAction(CCRepeatForever::create(to1));
+    addChild(m_pPump);
 
     // 指示针
     m_pIndicator = CCSprite::create("UI_01_05.png");
@@ -42,20 +54,34 @@ void CWaterpump::onEnter()
     m_pIndicator->setPosition(ccp(visiableView.width/2, fBottomHeight));
     addChild(m_pIndicator);
 
+    // 怒气值
+    m_pFuryPower = CCSprite::create("UI_01_03.png", CCRectMake(0,0,1090,44));
+    m_pFuryPower->setAnchorPoint(ccp(0.0f, 0.5f));
+    ccTexParams params = {GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE};
+    m_pFuryPower->getTexture()->setTexParameters(&params);
+    m_pFuryPower->setPosition(ccp(visiableView.width/2 - 545, 44));
+    m_pFuryPower->setScaleX(0.5f);
+    addChild(m_pFuryPower, -1);
+
+    CCSprite *pFuryBg = CCSprite::create("UI_01_02.png", CCRectMake(0,0,1090,44));
+    pFuryBg->getTexture()->setTexParameters(&params);
+    pFuryBg->setPosition(ccp(visiableView.width/2, 44));
+    addChild(pFuryBg, -2);
+
     //菜单
     CCMenuItemSprite *pFireItem = initMenuItemWithFiles(szItemNormal[0], szItemSelected[0], szItemDisable[0], menu_selector(CWaterpump::onSelectedMenuItem));
     pFireItem->setTag(ROLEID_FIREAXE);
     CCMenuItemSprite *pIceItem = initMenuItemWithFiles(szItemNormal[1], szItemSelected[1], szItemDisable[1], menu_selector(CWaterpump::onSelectedMenuItem));
-    pFireItem->setTag(ROLEID_ICEAXE);
+    pIceItem->setTag(ROLEID_ICEAXE);
     CCMenuItemSprite *pBaneItem = initMenuItemWithFiles(szItemNormal[2], szItemSelected[2], szItemDisable[2], menu_selector(CWaterpump::onSelectedMenuItem));
-    pFireItem->setTag(ROLEID_BANEAXE);
+    pBaneItem->setTag(ROLEID_BANEAXE);
     CCMenuItemSprite *pWindItem = initMenuItemWithFiles(szItemNormal[3], szItemSelected[3], szItemDisable[3], menu_selector(CWaterpump::onSelectedMenuItem));
-    pFireItem->setTag(ROLEID_WINDAXE);
+    pWindItem->setTag(ROLEID_WINDAXE);
 
     CCMenu *pMenu = CCMenu::create(pFireItem, pIceItem, pBaneItem, pWindItem, NULL);
     float fItemHeight = pFireItem->getContentSize().height;
     float fItemWidth = pFireItem->getContentSize().width;
-    float fPumpWidth = pPump->getContentSize().width;
+    float fPumpWidth = m_pPump->getContentSize().width;
     pFireItem->setPosition(ccp(visiableView.width/2 - fPumpWidth/2 - (1.5f*fItemWidth), fItemHeight/2));
     pIceItem->setPosition(ccp(visiableView.width/2 - fPumpWidth/2 - (0.5f*fItemWidth), fItemHeight/2));
     pBaneItem->setPosition(ccp(visiableView.width/2 + fPumpWidth/2 + (0.5f*fItemWidth), fItemHeight/2));
@@ -75,7 +101,28 @@ void CWaterpump::onExit()
 
 void CWaterpump::update(float dt)
 {
+    int power = m_pPump->getPercentage()/20;
+    CControlerManager::GetInstance()->SetShootForce(power);
+}
 
+void CWaterpump::addFuryPower(int power)
+{
+    if (m_nCurFuryPower < m_nMaxFuryPower)
+    {
+        m_nCurFuryPower += power;
+        float scalex = float(m_nCurFuryPower / m_nMaxFuryPower);
+        if (scalex >= 1.0f)
+        {
+            scalex = 1.0f;
+            m_pFuryPower->setScaleX(scalex);
+        }
+    }
+}
+
+void CWaterpump::clearFuryPower()
+{
+    m_nCurFuryPower = 0;
+    m_pFuryPower->setScaleX(0.0f);
 }
 
 CCMenuItemSprite *CWaterpump::initMenuItemWithFiles(const char *normal, const char *selected, const char *disable, SEL_MenuHandler selector)
@@ -84,9 +131,15 @@ CCMenuItemSprite *CWaterpump::initMenuItemWithFiles(const char *normal, const ch
     CCSprite *pSelected = CCSprite::create(selected);
     CCSprite *pDisable = CCSprite::create(disable);
 
-    CCMenuItemSprite *pItem = CCMenuItemSprite::create(pNormal, pSelected, pDisable, selector);
-    //     CCLabelBMFont *pFnt = CCLabelBMFont::create("00", szFontAxeCnt);
-    //     pItem->addChild(pFnt, 1, Tag_ItemFnt);
+    CCMenuItemSprite *pItem = CCMenuItemSprite::create(pNormal, pSelected, pDisable, this, selector);
+    int cnt = 0;
+    char szCntStr[8] = {0};
+    sprintf(szCntStr, "%d", cnt);
+    CCLabelAtlas *pCntFnt = CCLabelAtlas::create(szCntStr, "UI_02_05.png", 48, 57, '0');
+    pCntFnt->setAnchorPoint(ccp(1, 0));
+    pCntFnt->setPosition(ccp(pItem->getContentSize().width, 0));
+    pItem->addChild(pCntFnt, 1, Tag_ItemFnt);
+    
     return pItem;
 }
 

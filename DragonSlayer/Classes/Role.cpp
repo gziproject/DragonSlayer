@@ -6,8 +6,8 @@ USING_NS_CC_EXT;
 
 CRole::CRole(void)
 {
-    m_fB2Width = 4.4f;
-    m_fB2Height = 6.0f;
+    m_fB2Width = 2.0f;
+    m_fB2Height = 3.0f;
     m_nAxeType = ROLEID_NORMAXE;
     m_bIsReload = true;
 }
@@ -106,7 +106,7 @@ void CRole::OnMovementEvent(CCArmature *armature, MovementEventType movementType
 
 void CRole::OnChangeAxe(CCObject *pObj)
 {
-    int nTag = dynamic_cast<CCNode*>(pObj)->getTag();
+    int nTag = dynamic_cast<CCMenuItemSprite*>(pObj)->getTag();
     int index = nTag - ROLEID_NORMAXE;
 
     m_nAxeType = nTag;

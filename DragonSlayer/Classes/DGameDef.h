@@ -6,7 +6,7 @@
 #define ACTIONNAME_DIE              "Die"
 #define ACTIONNAME_INJURE           "Injure"
 
-#define PTM_RATIO                   32
+#define PTM_RATIO                   62
 
 #define MSG_ROLEACOMPLETE           "MsgRoleAComplete"                        //玩家攻击动作完成
 #define MSG_UICHANGEAXE             "MsgChangeAxe"                            //玩家点击UI界面, 切换了斧子
