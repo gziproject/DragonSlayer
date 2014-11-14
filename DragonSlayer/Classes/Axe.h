@@ -16,6 +16,8 @@ public:
     static CPhysicsObject* create(int rid);
     // 角色类型
     virtual int GetRoleType();
+    // 撞击地面就删除
+    virtual bool IsTouchGroundRemove() { return true; }
     // 初始化一些数据
     virtual void InitWithRid(int rid);
     // 攻击力

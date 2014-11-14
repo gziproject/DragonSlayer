@@ -13,8 +13,14 @@ public:
     // ½ÇÉ«ÀàÐÍ
     virtual int GetRoleType();
     //
+    virtual bool IsTouchGroundRemove() { return m_bIsTouchGroundRemove; }
+    //
     virtual float Injure(int power);
     //
     virtual void Die();
+
+private:
+
+    bool            m_bIsTouchGroundRemove;
 };
 

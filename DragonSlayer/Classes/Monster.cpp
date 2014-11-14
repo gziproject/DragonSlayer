@@ -7,6 +7,7 @@ CMonster::CMonster(void)
 {
     m_fB2Width = 2.5f;
     m_fB2Height = 1.5f;
+    m_bIsTouchGroundRemove = false;
 }
 
 CMonster::~CMonster(void)
@@ -68,4 +69,6 @@ void CMonster::Die()
     filer.categoryBits = COLLIDE_CATEGORY_ROLE;
     filer.maskBits = COLLIDE_MASKBIT_ROLE & COLLIDE_MASKBIT_MONSTER;
     pFixture->SetFilterData(filer);
+
+    m_bIsTouchGroundRemove = true;
 }

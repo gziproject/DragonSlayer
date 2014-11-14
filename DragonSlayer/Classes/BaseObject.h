@@ -11,9 +11,12 @@ public:
 
     // 角色类型
     virtual int GetRoleType() { return ROLETYPE_NONE; }
+    
     // 角色ID
     virtual void SetRoleID(int rid) { m_nRoleID = rid; }
     virtual int GetRoleID() { return m_nRoleID; }
+
+    virtual bool IsTouchGroundRemove() { return false; }
 
 protected:
 

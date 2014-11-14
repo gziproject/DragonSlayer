@@ -14,8 +14,9 @@ public:
     // 实例化一个对象
     static CGameObject* create(int rid);
 
-    void onEnter();
-    void onExit();
+    virtual void onEnter();
+    virtual void onExit();
+    virtual void update(float dt);
 
     // 角色类型
     virtual int GetRoleType();
@@ -26,6 +27,7 @@ public:
     // 重新载入斧子是否完成
     bool IsReload() { return m_bIsReload; }
 
+    
 private:
     
     void OnMovementEvent(cocos2d::extension::CCArmature *armature, cocos2d::extension::MovementEventType movementType, const char *movementID);

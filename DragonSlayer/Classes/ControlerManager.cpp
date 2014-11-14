@@ -3,7 +3,8 @@
 
 CControlerManager::CControlerManager(void)
     :m_fShootAngle(0.0f),
-    m_nShootForce(0)
+    m_nShootForce(0),
+    m_bGamePause(false)
 {
 }
 
@@ -31,9 +32,9 @@ void CControlerManager::Destroy()
     }
 }
 
-void CControlerManager::UpdateShootAngle(float distance)
+void CControlerManager::SetShootAngle(float angles)
 {
-    m_fShootAngle = 0.0f;
+    m_fShootAngle = angles;
 }
 
 float CControlerManager::GetShootAngle()
@@ -49,4 +50,14 @@ int CControlerManager::GetShootForce()
 void CControlerManager::SetShootForce(int force) 
 { 
     m_nShootForce = force;
+}
+
+bool CControlerManager::IsGamePause()
+{
+    return m_bGamePause;
+}
+
+void CControlerManager::SetGamePause(bool pause)
+{
+    m_bGamePause = pause;
 }

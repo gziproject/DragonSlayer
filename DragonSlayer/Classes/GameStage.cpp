@@ -103,7 +103,7 @@ void CGameStage::onEnter()
 
     //读取配置(如果有的话)
     //通过配置添加游戏对象
-    m_pRole = dynamic_cast<CRole*>(AddBody(ROLEID_HERO, visibleSize.width/2 + 100, 400));
+    m_pRole = dynamic_cast<CRole*>(AddBody(ROLEID_HERO, visibleSize.width/2 + 100, 490));
     if (NULL != m_pRole)
     {
         m_pRole->getAnimation()->playWithIndex(0);
@@ -137,6 +137,8 @@ void CGameStage::onExit()
 
 void CGameStage::update(float delta)
 {
+    // 出兵
+
     m_b2World->Step(delta, 8, 3);
 
     for (int32 i = 0; i < m_nPoints; ++i)
@@ -152,14 +154,14 @@ void CGameStage::update(float delta)
         CMonster *pMonster = NULL;
 
         // 碰到地板的, 除了英雄自己, 无论什么东西都删除
-        if (pObj1 == NULL && pObj2->GetRoleType() != ROLETYPE_HERO)
+        if (pObj1 == NULL && pObj2->IsTouchGroundRemove())
         {
             m_willDestroyBodys[++m_nBodyIndex] = pBody2;
             CCNode* pRm = dynamic_cast<CCNode*>(pObj2);
             pRm->removeFromParentAndCleanup(true);
 
         }
-        else if (pObj2 == NULL && pObj1->GetRoleType() != ROLETYPE_HERO)
+        else if (pObj2 == NULL && pObj1->IsTouchGroundRemove())
         {
             m_willDestroyBodys[++m_nBodyIndex] = pBody1;
             CCNode* pRm = dynamic_cast<CCNode*>(pObj1);
@@ -275,6 +277,22 @@ CGameObject* CGameStage::AddBody(int rid, float x, float y)
             pjd.lowerTranslation = 0.0f;
             pjd.upperTranslation = 20.0f;
             pjd.enableLimit = false;
+
+            b2PrismaticJoint *pJoint = dynamic_cast<b2PrismaticJoint *>(m_b2World->CreateJoint(&pjd));
+        }
+        else
+        {
+            // 将英雄控制在船上
+            b2PrismaticJointDef pjd;
+            b2Vec2 axis(1.0f, 0.0f);
+            axis.Normalize();
+            pjd.Initialize(m_groundBody, pBody, b2Vec2(0.0f, 0.0f), axis);
+            pjd.motorSpeed = -1.0f;
+            pjd.maxMotorForce = 1000.0f;
+            pjd.enableMotor = false;
+            pjd.lowerTranslation = -5.0f - pObj->GetB2Width() - 1;
+            pjd.upperTranslation = 5.0f;
+            pjd.enableLimit = true;
 
             b2PrismaticJoint *pJoint = dynamic_cast<b2PrismaticJoint *>(m_b2World->CreateJoint(&pjd));
         }
@@ -396,6 +414,15 @@ bool CGameStage::ccTouchBegan(CCTouch *pTouch, CCEvent *pEvent)
         OnAttackMonster();
     }
 
+    if (pos.x > visibleSize.width/2)
+    {
+        ApplyMoveLeftForce(2000.0f);
+    }
+    else
+    {
+        ApplyMoveRightForce(2000.0f);
+    }
+
     return true;
 }
 
@@ -414,15 +441,7 @@ void CGameStage::didAccelerate(cocos2d::CCAcceleration* pAccelerationValue)
     double &x = pAccelerationValue->x;
     double &y = pAccelerationValue->y;
 
-
-    //     if (pos.x > visibleSize.width/2)
-    //     {
-    //         ApplyLeftForce(2000.0f);
-    //     }
-    //     else
-    //     {
-    //         ApplyRightForce(2000.0f);
-    //     }
+    ApplyMoveRightForce(x * 2000.0f);
 }
 
 void CGameStage::InitFloor()
@@ -472,12 +491,12 @@ void CGameStage::AddTestBoxAtPos(float x, float y)
     pBox->CreateFixture(&fdef);
 }
 
-void CGameStage::ApplyLeftForce(float fForce)
+void CGameStage::ApplyMoveLeftForce(float fForce)
 {
-    ApplyRightForce(-1 * fForce);
+    ApplyMoveRightForce(-1 * fForce);
 }
 
-void CGameStage::ApplyRightForce(float fForce)
+void CGameStage::ApplyMoveRightForce(float fForce)
 {
     b2Body *pPlayerBody = m_pRole->GetB2body();
     b2Vec2 f = pPlayerBody->GetWorldVector(b2Vec2(fForce, 0.0f));
@@ -492,12 +511,12 @@ void CGameStage::OnAttackMonster()
 void CGameStage::onAttackCallback(cocos2d::CCObject *pObj)
 {
     // 获得角度, 力度, 发射斧头
-    float angles = 0.0f;
+    float angles = CControlerManager::GetInstance()->GetShootAngle();
     float power = CControlerManager::GetInstance()->GetShootForce();
-    float x = m_pRole->getPositionX() + 50;
+    float x = m_pRole->getPositionX() + 50 * m_pRole->getScaleX();
     float y = m_pRole->getPositionY();
 
-    b2Vec2 v2Force = b2Vec2(-800.0f, power * 700.0f);
+    b2Vec2 v2Force = b2Vec2(angles * 80.0f, power * 800.0f);
     CPhysicsObject *pAxe = AddAxe(m_pRole->GetAxeType(), x, y);
     if (NULL != pAxe)
     {

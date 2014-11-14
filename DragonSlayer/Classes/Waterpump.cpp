@@ -103,6 +103,10 @@ void CWaterpump::update(float dt)
 {
     int power = m_pPump->getPercentage()/20;
     CControlerManager::GetInstance()->SetShootForce(power);
+
+    // ¸üÐÂ½Ç¶È
+    float angles = CControlerManager::GetInstance()->GetShootAngle();
+    m_pIndicator->setRotation(angles);
 }
 
 void CWaterpump::addFuryPower(int power)

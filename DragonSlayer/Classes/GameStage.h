@@ -60,8 +60,8 @@ private:
 
     void InitFloor();
     void AddTestBoxAtPos(float x, float y);
-    void ApplyLeftForce(float fForce);
-    void ApplyRightForce(float fForce);
+    void ApplyMoveLeftForce(float fForce);
+    void ApplyMoveRightForce(float fForce);
 
     // 玩家操作: 投掷斧头
     void OnAttackMonster();

@@ -1,5 +1,6 @@
 #include "Role.h"
 #include "ArmatureLoader.h"
+#include "ControlerManager.h"
 
 USING_NS_CC;
 USING_NS_CC_EXT;
@@ -45,7 +46,11 @@ void CRole::onEnter()
     getAnimation()->setMovementEventCallFunc(this, movementEvent_selector(CRole::OnMovementEvent));
 
     // 换上武器装备 Sword
-    std::string sWeaponName[] = {"00_01.png", "00_02.png", "00_03.png", "00_04.png", "00_05.png"};
+    std::string sWeaponName[] = {
+        "00_01.png", "00_02.png", 
+        "00_03.png", "00_04.png", 
+        "00_05.png"};
+
     vector<CCNode*> vecSword;
     for (int i = 0; i < sizeof(sWeaponName)/sizeof(sWeaponName[0]); ++i)
     {
@@ -59,13 +64,32 @@ void CRole::onEnter()
 
     getBone("00")->changeDisplayWithIndex(0, true);
     getBone("00")->setOpacity(0.0f);
-    //getBone("00")->setScale(0.8f);
 }
 
 void CRole::onExit()
 {
     CGameObject::onExit();
     CCNotificationCenter::sharedNotificationCenter()->removeObserver(this, MSG_UICHANGEAXE);
+}
+
+void CRole::update(float dt)
+{
+    CGameObject::update(dt);
+    CCSize visiableView = CCDirector::sharedDirector()->getWinSize();
+    // 是否翻转英雄反向, 并且根据英雄所在的位置换算出斧子投掷的角度    
+    float dist = abs(getPositionX() - visiableView.width/2);
+    float maxDist = visiableView.width/2 - 330;
+    float angles = dist*15/maxDist;
+    if (getPositionX() > visiableView.width/2)
+    {
+        setScaleX(-1.0f);
+        CControlerManager::GetInstance()->SetShootAngle(angles);
+    }
+    else
+    {
+        setScaleX(1.0f);
+        CControlerManager::GetInstance()->SetShootAngle(-1*angles);
+    }
 }
 
 int CRole::GetRoleType()
