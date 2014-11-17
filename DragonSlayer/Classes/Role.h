@@ -27,7 +27,6 @@ public:
     // 重新载入斧子是否完成
     bool IsReload() { return m_bIsReload; }
 
-    
 private:
     
     void OnMovementEvent(cocos2d::extension::CCArmature *armature, cocos2d::extension::MovementEventType movementType, const char *movementID);

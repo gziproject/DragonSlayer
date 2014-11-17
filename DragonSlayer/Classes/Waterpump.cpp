@@ -32,6 +32,11 @@ void CWaterpump::onEnter()
     // 距离底部距离, 等同与怒气条的高度
     float fBottomHeight = 65.0f;
 
+    // 监听玩家攻击
+    CCNotificationCenter::sharedNotificationCenter()->addObserver(this, 
+        callfuncO_selector(CWaterpump::onRoleAttackCallback), 
+        MSG_ROLEACOMPLETE, NULL);
+
     CCSprite *pumpBg = CCSprite::create("UI_01_01.png");
     addChild(pumpBg);
     pumpBg->setPosition(ccp(visiableView.width/2, pumpBg->getContentSize().height/2));
@@ -69,6 +74,11 @@ void CWaterpump::onEnter()
     addChild(pFuryBg, -2);
 
     //菜单
+    //普通斧子用来传递给角色数据, 不做显示用
+    m_pNormalItem = initMenuItemWithFiles(szItemNormal[0], szItemSelected[0], szItemDisable[0], menu_selector(CWaterpump::onSelectedMenuItem));
+    m_pNormalItem->setTag(ROLEID_NORMAXE);
+    m_pNormalItem->setVisible(false);
+
     CCMenuItemSprite *pFireItem = initMenuItemWithFiles(szItemNormal[0], szItemSelected[0], szItemDisable[0], menu_selector(CWaterpump::onSelectedMenuItem));
     pFireItem->setTag(ROLEID_FIREAXE);
     CCMenuItemSprite *pIceItem = initMenuItemWithFiles(szItemNormal[1], szItemSelected[1], szItemDisable[1], menu_selector(CWaterpump::onSelectedMenuItem));
@@ -96,7 +106,7 @@ void CWaterpump::onEnter()
 void CWaterpump::onExit()
 {
     CCSprite::onExit();
-
+    CCNotificationCenter::sharedNotificationCenter()->removeObserver(this, MSG_ROLEACOMPLETE);
 }
 
 void CWaterpump::update(float dt)
@@ -150,8 +160,39 @@ CCMenuItemSprite *CWaterpump::initMenuItemWithFiles(const char *normal, const ch
 void CWaterpump::onSelectedMenuItem(cocos2d::CCObject *pSender)
 {
     // 条件判定, 斧子是否还有
-    if (1)
+    if (NULL != m_pSelectedItem)
+    {
+        m_pSelectedItem->unselected();
+    }
+
+    m_pSelectedItem = dynamic_cast<CCMenuItemSprite*>(pSender);
+    int nAxeType = m_pSelectedItem->getTag();
+    int nRemainAxe = 1;
+    if (nRemainAxe > 0)
     {
         CCNotificationCenter::sharedNotificationCenter()->postNotification(MSG_UICHANGEAXE, pSender);
+    }
+    else
+    {
+        CCNotificationCenter::sharedNotificationCenter()->postNotification(MSG_UICHANGEAXE, m_pNormalItem);
+        m_pSelectedItem = m_pNormalItem;
+    }
+
+    m_pSelectedItem->selected();
+}
+
+void CWaterpump::onRoleAttackCallback(cocos2d::CCObject *pObj)
+{
+    // 攻击完, 斧子是否还有
+    if (m_pSelectedItem != m_pNormalItem)
+    {
+        int nRemainAxe = 1;
+        if (nRemainAxe <= 0)
+        {
+            m_pSelectedItem->unselected();
+            m_pSelectedItem = m_pNormalItem;
+            CCNotificationCenter::sharedNotificationCenter()->postNotification(MSG_UICHANGEAXE, m_pNormalItem);
+            m_pSelectedItem->selected();
+        }
     }
 }
