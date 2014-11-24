@@ -28,6 +28,7 @@ static const SAxeFromTexture m_AxeInfo[5] = {
     {0,283, 165, 81},
     {0,364, 148, 83}
 };
+
 CGameStage::CGameStage(void)
 {
     for (int i = 0; i < 32; ++i)
@@ -84,9 +85,9 @@ bool CGameStage::init()
     pBg->setPosition(ccp(visiableView.width/2, visiableView.height/2));
     
     // ui²ã
-    CGameUILayer *pUILayer = CGameUILayer::create();
-    addChild(pUILayer, 2);
-    pUILayer->setPosition(CCPointZero);
+    m_pGameUiLayer = CGameUILayer::create();
+    addChild(m_pGameUiLayer, 2);
+    m_pGameUiLayer->setPosition(CCPointZero);
 
     return true;
 }

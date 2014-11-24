@@ -3,7 +3,8 @@
 
 #include "GameObject.h"
 
-class CRole : public CGameObject
+class CRole : 
+    public CGameObject
 {
 public:
     CRole(void);

@@ -1,6 +1,7 @@
 #include "Waterpump.h"
 #include "DGameDef.h"
 #include "ControlerManager.h"
+#include "PlayerAccount.h"
 #include <string.h>
 
 USING_NS_CC;
@@ -16,8 +17,9 @@ CWaterpump::CWaterpump(void)
     m_pIndicator = NULL;
     m_pPump = NULL;
     m_pFuryPower = NULL;
-    m_nCurFuryPower = 0;
-    m_nMaxFuryPower = 100;
+    m_pSelectedItem = NULL;
+    m_fCurFuryPower = 0;
+    m_fMaxFuryPower = 100;
 }
 
 CWaterpump::~CWaterpump(void)
@@ -65,7 +67,7 @@ void CWaterpump::onEnter()
     ccTexParams params = {GL_LINEAR, GL_LINEAR, GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE};
     m_pFuryPower->getTexture()->setTexParameters(&params);
     m_pFuryPower->setPosition(ccp(visiableView.width/2 - 545, 44));
-    m_pFuryPower->setScaleX(0.5f);
+    m_pFuryPower->setScaleX(0.0f);
     addChild(m_pFuryPower, -1);
 
     CCSprite *pFuryBg = CCSprite::create("UI_01_02.png", CCRectMake(0,0,1090,44));
@@ -75,20 +77,15 @@ void CWaterpump::onEnter()
 
     //菜单
     //普通斧子用来传递给角色数据, 不做显示用
-    m_pNormalItem = initMenuItemWithFiles(szItemNormal[0], szItemSelected[0], szItemDisable[0], menu_selector(CWaterpump::onSelectedMenuItem));
-    m_pNormalItem->setTag(ROLEID_NORMAXE);
-    m_pNormalItem->setVisible(false);
+    m_pNormalAxeItem = initMenuItemWithFiles(ROLEID_NORMAXE, szItemNormal[0], szItemSelected[0], szItemDisable[0], menu_selector(CWaterpump::onSelectedMenuItem));
+    m_pNormalAxeItem->setVisible(false);
 
-    CCMenuItemSprite *pFireItem = initMenuItemWithFiles(szItemNormal[0], szItemSelected[0], szItemDisable[0], menu_selector(CWaterpump::onSelectedMenuItem));
-    pFireItem->setTag(ROLEID_FIREAXE);
-    CCMenuItemSprite *pIceItem = initMenuItemWithFiles(szItemNormal[1], szItemSelected[1], szItemDisable[1], menu_selector(CWaterpump::onSelectedMenuItem));
-    pIceItem->setTag(ROLEID_ICEAXE);
-    CCMenuItemSprite *pBaneItem = initMenuItemWithFiles(szItemNormal[2], szItemSelected[2], szItemDisable[2], menu_selector(CWaterpump::onSelectedMenuItem));
-    pBaneItem->setTag(ROLEID_BANEAXE);
-    CCMenuItemSprite *pWindItem = initMenuItemWithFiles(szItemNormal[3], szItemSelected[3], szItemDisable[3], menu_selector(CWaterpump::onSelectedMenuItem));
-    pWindItem->setTag(ROLEID_WINDAXE);
+    CCMenuItemSprite *pFireItem = initMenuItemWithFiles(ROLEID_FIREAXE, szItemNormal[0], szItemSelected[0], szItemDisable[0], menu_selector(CWaterpump::onSelectedMenuItem));
+    CCMenuItemSprite *pIceItem = initMenuItemWithFiles(ROLEID_ICEAXE, szItemNormal[1], szItemSelected[1], szItemDisable[1], menu_selector(CWaterpump::onSelectedMenuItem));
+    CCMenuItemSprite *pBaneItem = initMenuItemWithFiles(ROLEID_BANEAXE, szItemNormal[2], szItemSelected[2], szItemDisable[2], menu_selector(CWaterpump::onSelectedMenuItem));
+    CCMenuItemSprite *pWindItem = initMenuItemWithFiles(ROLEID_WINDAXE, szItemNormal[3], szItemSelected[3], szItemDisable[3], menu_selector(CWaterpump::onSelectedMenuItem));
 
-    CCMenu *pMenu = CCMenu::create(pFireItem, pIceItem, pBaneItem, pWindItem, NULL);
+    CCMenu *pMenu = CCMenu::create(m_pNormalAxeItem, pFireItem, pIceItem, pBaneItem, pWindItem, NULL);
     float fItemHeight = pFireItem->getContentSize().height;
     float fItemWidth = pFireItem->getContentSize().width;
     float fPumpWidth = m_pPump->getContentSize().width;
@@ -121,39 +118,40 @@ void CWaterpump::update(float dt)
 
 void CWaterpump::addFuryPower(int power)
 {
-    if (m_nCurFuryPower < m_nMaxFuryPower)
+    if (m_fCurFuryPower < m_fMaxFuryPower)
     {
-        m_nCurFuryPower += power;
-        float scalex = float(m_nCurFuryPower / m_nMaxFuryPower);
+        m_fCurFuryPower += power;
+        float scalex = m_fCurFuryPower / m_fMaxFuryPower;
         if (scalex >= 1.0f)
         {
             scalex = 1.0f;
-            m_pFuryPower->setScaleX(scalex);
         }
+
+        m_pFuryPower->setScaleX(scalex);
     }
 }
 
 void CWaterpump::clearFuryPower()
 {
-    m_nCurFuryPower = 0;
+    m_fCurFuryPower = 0;
     m_pFuryPower->setScaleX(0.0f);
 }
 
-CCMenuItemSprite *CWaterpump::initMenuItemWithFiles(const char *normal, const char *selected, const char *disable, SEL_MenuHandler selector)
+CCMenuItemSprite *CWaterpump::initMenuItemWithFiles(int type, const char *normal, const char *selected, const char *disable, SEL_MenuHandler selector)
 {
     CCSprite *pNormal = CCSprite::create(normal);
     CCSprite *pSelected = CCSprite::create(selected);
     CCSprite *pDisable = CCSprite::create(disable);
 
     CCMenuItemSprite *pItem = CCMenuItemSprite::create(pNormal, pSelected, pDisable, this, selector);
-    int cnt = 0;
+    int cnt = CPlayerAccount::GetAccountInstance()->GetAccountPropsNum(type);
     char szCntStr[8] = {0};
     sprintf(szCntStr, "%d", cnt);
     CCLabelAtlas *pCntFnt = CCLabelAtlas::create(szCntStr, "UI_02_05.png", 48, 57, '0');
     pCntFnt->setAnchorPoint(ccp(1, 0));
     pCntFnt->setPosition(ccp(pItem->getContentSize().width, 0));
     pItem->addChild(pCntFnt, 1, Tag_ItemFnt);
-    
+    pItem->setTag(type);
     return pItem;
 }
 
@@ -165,17 +163,18 @@ void CWaterpump::onSelectedMenuItem(cocos2d::CCObject *pSender)
         m_pSelectedItem->unselected();
     }
 
-    m_pSelectedItem = dynamic_cast<CCMenuItemSprite*>(pSender);
-    int nAxeType = m_pSelectedItem->getTag();
-    int nRemainAxe = 1;
-    if (nRemainAxe > 0)
+    CCMenuItemSprite *pSelected = dynamic_cast<CCMenuItemSprite*>(pSender);
+    int nAxeType = pSelected->getTag();
+    int nRemainAxe = CPlayerAccount::GetAccountInstance()->GetAccountPropsNum(nAxeType);
+    if (nRemainAxe > 0 && m_pSelectedItem != pSelected)
     {
         CCNotificationCenter::sharedNotificationCenter()->postNotification(MSG_UICHANGEAXE, pSender);
+        m_pSelectedItem = pSelected;
     }
     else
     {
-        CCNotificationCenter::sharedNotificationCenter()->postNotification(MSG_UICHANGEAXE, m_pNormalItem);
-        m_pSelectedItem = m_pNormalItem;
+        CCNotificationCenter::sharedNotificationCenter()->postNotification(MSG_UICHANGEAXE, m_pNormalAxeItem);
+        m_pSelectedItem = m_pNormalAxeItem;
     }
 
     m_pSelectedItem->selected();
@@ -184,15 +183,34 @@ void CWaterpump::onSelectedMenuItem(cocos2d::CCObject *pSender)
 void CWaterpump::onRoleAttackCallback(cocos2d::CCObject *pObj)
 {
     // 攻击完, 斧子是否还有
-    if (m_pSelectedItem != m_pNormalItem)
+    addFuryPower();
+    if (m_pSelectedItem != m_pNormalAxeItem && m_pSelectedItem != NULL)
     {
-        int nRemainAxe = 1;
+        // 不是普通斧子, 斧子数量减少1个
+        int nAxeType = m_pSelectedItem->getTag();
+        int nRemainAxe = CPlayerAccount::GetAccountInstance()->GetAccountPropsNum(nAxeType);
+        nRemainAxe -= 1;
+        ResetAxeNum(m_pSelectedItem, nRemainAxe);
+
+        CPlayerAccount::GetAccountInstance()->AddPlayerAccountProps(nAxeType, -1);
+        
         if (nRemainAxe <= 0)
         {
             m_pSelectedItem->unselected();
-            m_pSelectedItem = m_pNormalItem;
-            CCNotificationCenter::sharedNotificationCenter()->postNotification(MSG_UICHANGEAXE, m_pNormalItem);
+            m_pSelectedItem = m_pNormalAxeItem;
+            CCNotificationCenter::sharedNotificationCenter()->postNotification(MSG_UICHANGEAXE, m_pNormalAxeItem);
             m_pSelectedItem->selected();
         }
+    }
+}
+
+void CWaterpump::ResetAxeNum(cocos2d::CCMenuItemSprite *pItem, int num)
+{
+    CCLabelAtlas *pItemFnt = dynamic_cast<CCLabelAtlas*>(pItem->getChildByTag(Tag_ItemFnt));
+    if (NULL != pItemFnt)
+    {
+        char szNum[8] = {0};
+        sprintf(szNum, "%d", num);
+        pItemFnt->setString(szNum);
     }
 }

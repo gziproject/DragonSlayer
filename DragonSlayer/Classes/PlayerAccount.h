@@ -29,7 +29,6 @@ public:
 public:
 	
 	int	 GetAccountsMoney();
-
 	int  GetAccountPropsNum(int nPropsType);
 
     // Ç®Êý, µÝÔö

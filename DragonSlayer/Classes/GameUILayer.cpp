@@ -6,7 +6,10 @@ USING_NS_CC;
 
 CGameUILayer::CGameUILayer(void)
 {
+    m_pAtlasScore = NULL;
+    m_pAtlasMoney = NULL;
     m_nHpCnt = 0;
+    m_nScore = 0;
 }
 
 CGameUILayer::~CGameUILayer(void)
@@ -33,7 +36,8 @@ void CGameUILayer::onEnter()
     addChild(m_pAtlasMoney);
 
     // 分数钱旁边的暂停按钮
-    CCMenuItemImage *pItemPause = CCMenuItemImage::create("UI_02_03.png", "UI_02_04.png", this, menu_selector(CGameUILayer::onGamePause)); 
+    CCMenuItemImage *pItemPause = CCMenuItemImage::create(
+        "UI_02_03.png", "UI_02_04.png", this, menu_selector(CGameUILayer::onGamePause)); 
     CCMenu *pMenuPause = CCMenu::create(pItemPause, NULL);
     pMenuPause->setPosition(ccp(
         visiableView.width - pItemPause->getContentSize().width/2 - 80, 
@@ -62,6 +66,44 @@ void CGameUILayer::onExit()
     CCLayer::onExit();
 }
 
+void CGameUILayer::AddScore(int score)
+{
+    m_nScore += score;
+    char szTemp[8] = {0};
+    sprintf(szTemp, "%d", m_nScore);
+    m_pAtlasMoney->setString(szTemp);
+}
+
+void CGameUILayer::AddMoney(int money)
+{
+    CPlayerAccount::GetAccountInstance()->AddPlayerAccountMoney(money);
+    int money = CPlayerAccount::GetAccountInstance()->GetAccountsMoney();
+
+    char szMoney[8] = {0};
+    sprintf(szMoney, "%d", money);
+    m_pAtlasMoney->setString(szMoney);
+}
+
+void CGameUILayer::ChangeHP(int upVal)
+{
+    int nCurHp = m_nHpCnt;
+    m_nHpCnt += upVal;
+    while(nCurHp != m_nHpCnt && nCurHp >= 0)
+    {
+        // 加血的
+        if (nCurHp < m_nHpCnt)
+        {
+            m_pHpVec[nCurHp]->setDisabledImage(CCSprite::create("UI_02_02.png"));
+            nCurHp++;
+        }
+        else //扣血的
+        {
+            m_pHpVec[nCurHp]->setDisabledImage(CCSprite::create("UI_02_01.png"));
+            nCurHp--;
+        }
+    }
+}
+
 bool CGameUILayer::InitHp()
 {
     CCSize visiableView = CCDirector::sharedDirector()->getWinSize();
@@ -70,7 +112,8 @@ bool CGameUILayer::InitHp()
     m_nHpCnt = 3;
     for (int i = 0; i < m_nHpCnt; ++i)
     {
-        CCMenuItemImage *pHp = CCMenuItemImage::create("UI_02_02.png", "UI_02_01.png", "UI_02_02.png", NULL, NULL);
+        CCMenuItemImage *pHp = CCMenuItemImage::create(
+            "UI_02_02.png", "UI_02_01.png", "UI_02_02.png", NULL, NULL);
         float width = pHp->getContentSize().width;
         float height = pHp->getContentSize().height;
         pHp->setEnabled(false);
@@ -87,9 +130,7 @@ bool CGameUILayer::InitHp()
 
 void CGameUILayer::onRoleInjureCallback(cocos2d::CCObject *pObj)
 {
-    m_nHpCnt -= 1;
-    m_pHpVec[m_nHpCnt]->setDisabledImage(CCSprite::create("UI_02_01.png"));
-
+    ChangeHP(-1);
     if (m_nHpCnt <= 0)
     {
         //GameOver

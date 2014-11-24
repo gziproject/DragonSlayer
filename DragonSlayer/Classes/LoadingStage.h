@@ -3,7 +3,8 @@
 
 #include "cocos2d.h"
 
-class CLoadingStage : public cocos2d::CCLayer
+class CLoadingStage : 
+    public cocos2d::CCLayer
 {
 public:
     CLoadingStage(void);

@@ -1,6 +1,7 @@
 #include "LoadingStage.h"
 #include "GameStage.h"
 #include "ArmatureLoader.h"
+#include "PlayerAccount.h"
 
 USING_NS_CC;
 
@@ -31,7 +32,10 @@ CCScene* CLoadingStage::scene()
 void CLoadingStage::onEnter()
 {
     CCLayer::onEnter();
+    
     ArmatureLoader::GetInstance()->LoadArmatureWithFile("ani/armature.plist");
+    CPlayerAccount::GetAccountInstance()->AddPlayerAccountProps(ROLEID_FIREAXE, 10);
+    CPlayerAccount::GetAccountInstance()->AddPlayerAccountProps(ROLEID_ICEAXE, 10);
 
     CCScene *scene = CGameStage::scene();
     CCDirector::sharedDirector()->replaceScene(scene);

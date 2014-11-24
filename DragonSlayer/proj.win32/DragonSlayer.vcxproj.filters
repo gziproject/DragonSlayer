@@ -62,9 +62,6 @@
     <ClCompile Include="..\Classes\Role.cpp">
       <Filter>Classes\GameStage</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\PlayerAccount.cpp">
-      <Filter>Classes\Tools</Filter>
-    </ClCompile>
     <ClCompile Include="..\Classes\CsvLoader.cpp">
       <Filter>Classes\Tools</Filter>
     </ClCompile>
@@ -79,6 +76,9 @@
     </ClCompile>
     <ClCompile Include="..\Classes\Waterpump.cpp">
       <Filter>Classes\GameStage</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\PlayerAccount.cpp">
+      <Filter>Classes</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -130,9 +130,6 @@
     <ClInclude Include="..\Classes\PhysicsObject.h">
       <Filter>Classes\GameStage</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\PlayerAccount.h">
-      <Filter>Classes\Tools</Filter>
-    </ClInclude>
     <ClInclude Include="..\Classes\CsvLoader.h">
       <Filter>Classes\Tools</Filter>
     </ClInclude>
@@ -153,6 +150,9 @@
     </ClInclude>
     <ClInclude Include="..\Classes\Waterpump.h">
       <Filter>Classes\GameStage</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\PlayerAccount.h">
+      <Filter>Classes</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

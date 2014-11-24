@@ -1,6 +1,7 @@
 #include "GameObject.h"
 
-class CMonster : public CGameObject
+class CMonster : 
+    public CGameObject
 {
 public:
     CMonster(void);

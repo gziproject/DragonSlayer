@@ -73,13 +73,14 @@ private:
     b2Body*         m_groundBody;                  // 地板
     b2Body*         m_willDestroyBodys[32];        // 处理碰撞之后将会删除的刚体
     SContactPoint   m_ContactPoints[1024];         // 所有碰撞点
-    CRole*    m_pRole;                       // 游戏控制角色
     cocos2d::CCSpriteBatchNode* m_pSpriteBatchNode;   // 批处理节点
 
     std::set<CPhysicsObject *> m_ReleaseList;         // 释放的列表
 
     int             m_nBodyIndex;                  // 需要销毁刚体列表下标
     int             m_nPoints;                     // 碰撞点个数
+    CRole*          m_pRole;                       // 游戏控制角色
+    CGameUILayer*   m_pGameUiLayer;                // 显示UI层
 };
 
 #endif // __GAMESTAGE_H__
